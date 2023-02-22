@@ -1,4 +1,4 @@
-# KitchenChaos
+# Kitchen Chaos
 
 A simpler version of *Overcooked*, currently single player, one level. Playable with keyboard and gamepad. 
 ***
