@@ -14,7 +14,9 @@ The gameplay is controlled by a simple state machine with four states:
 ***
 ### Input system
 The game uses the new Unity input system and currently supports keyboard and gamepads. I plan to implement touch screen as well.<br>
-Default controls: keyboard: move with WASD/arrows, interact with E, alternative interact with F, pause with F; gamepad: move with the left analog stick, interact with A, alternative interact with X, pause with START.
+Default controls: 
+* keyboard: move with WASD/arrows, interact with E, alternative interact with F, pause with ESCAPE; 
+* gamepad: move with the left analog stick, interact with A, alternative interact with X, pause with START.
 ***
 ### Code
 The game uses events, scriptable objects and state machines extensively. Since the states are very simple, I didn't bother with creating a separate state class for every state and instead I used a dictionary (for gameplay states) or switch statements (in super simple cases, for example when it comes to input). There is currently one case I plan to refactor from using a switch to  at least using a dictionary (stove counter states).
