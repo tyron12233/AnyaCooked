@@ -13,7 +13,8 @@ The gameplay is controlled by a simple state machine with four states:
 * GameOver - after the level timer is finished, the total number of recipes delivered is displayed, along with the high score. The game can then be replayed. 
 ***
 ### Input system
-The game uses the new Unity input system and currently supports keyboard and gamepads. I plan to implement touch screen as well.
+The game uses the new Unity input system and currently supports keyboard and gamepads. I plan to implement touch screen as well.<br>
+Default controls: keyboard: move with WASD/arrows, interact with E, alternative interact with F, pause with F; gamepad: move with the left analog stick, interact with A, alternative interact with X, pause with START.
 ***
 ### Code
 The game uses events, scriptable objects and state machines extensively. Since the states are very simple, I didn't bother with creating a separate state class for every state and instead I used a dictionary (for gameplay states) or switch statements (in super simple cases, for example when it comes to input). There is currently one case I plan to refactor from using a switch to  at least using a dictionary (stove counter states).
@@ -29,4 +30,4 @@ As of 22 Feb 2023:
 * pooling instead of spawning
 * fix sound: the countdown sound; burning warning sound
 * fix the scoring system - currently all recipes are scored equally - recipes with more ingredients should give more points
-* BACKGLOG: instead of spawning plates on the plates counter right away, start with plates on several counters; player should be able to put ingredients directly on the plate if the plate is on the counter; player should be able to put ingredients in a bun even if the bun isn't on a plate
+* BACKGLOG: instead of spawning plates on the plates counter right away, start with plates on several counters; player should be able to put ingredients directly on the plate if the plate is on the counter; player should be able to put ingredients in a bun even if the bun isn't on a plate; logic and input for boosting the player's movement.
