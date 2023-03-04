@@ -9,6 +9,7 @@
         ObjectPickup,
         StoveSizzle,
         Trash,
-        Warning
+        GeneralWarning,
+        BurnWarning
     }
 }

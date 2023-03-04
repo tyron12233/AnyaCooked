@@ -93,6 +93,11 @@ namespace KitchenChaos.Core
         {
         }
 
+        public bool IsWaitingToStart()
+        {
+            return _state == GameplayState.WaitingToStart;
+        }
+
         public bool IsGamePlaying()
         {
             return _state == GameplayState.GamePlayingTime;

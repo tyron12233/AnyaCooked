@@ -11,7 +11,7 @@ namespace KitchenChaos.Audio
         public SO_SoundConfig SoundConfig => _soundConfig;
 
         [Header("Sound world position")]
-        [SerializeField] Transform _deliveryCounter; //refactor this to allow for more
+        [SerializeField] Transform _deliveryCounter; //refactor this to allow for more or extract into separate (see stove)
 
         void Start()
         {
@@ -21,23 +21,12 @@ namespace KitchenChaos.Audio
             PlayerInteractions.OnPickedSomething += PlayerInteractions_OnPickedSomething;
             BaseCounter.OnAnyObjectPlaced += BaseCounter_OnAnyObjectPlaced;
             TrashCounter.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
-            StoveCounter.OnStateChanged += StoveCounter_OnStateChanged;
             StartCountdownUI.OnNumberChanged += StartCountdownUI_OnNumberChanged;
         }
 
         void StartCountdownUI_OnNumberChanged()
         {
-            _soundConfig.PlaySingleSound(SoundType.Warning, Vector3.zero);
-        }
-
-        void StoveCounter_OnStateChanged(StoveCounter.State state, StoveCounter counter)
-        {
-            bool shouldPlay = state == StoveCounter.State.Frying || state == StoveCounter.State.Fried;
-
-            if (shouldPlay)
-                _soundConfig.PlayLoopingSound(SoundType.StoveSizzle, counter.gameObject);
-            else
-                _soundConfig.StopPlayingSound(counter.gameObject);
+            _soundConfig.PlaySingleSound(SoundType.GeneralWarning, Vector3.zero);
         }
 
         void TrashCounter_OnAnyObjectTrashed(TrashCounter counter)
@@ -78,7 +67,6 @@ namespace KitchenChaos.Audio
             PlayerInteractions.OnPickedSomething -= PlayerInteractions_OnPickedSomething;
             BaseCounter.OnAnyObjectPlaced -= BaseCounter_OnAnyObjectPlaced;
             TrashCounter.OnAnyObjectTrashed -= TrashCounter_OnAnyObjectTrashed;
-            StoveCounter.OnStateChanged -= StoveCounter_OnStateChanged;
             StartCountdownUI.OnNumberChanged -= StartCountdownUI_OnNumberChanged;
         }
     }

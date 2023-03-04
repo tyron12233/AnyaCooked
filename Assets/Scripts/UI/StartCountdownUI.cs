@@ -20,12 +20,14 @@ namespace KitchenChaos.Core.UI
 
         void Update()
         {
+            if (!GameManager.Instance.IsCountdownActive()) return;
+
             int countdownNumber = Mathf.CeilToInt(GameManager.Instance.CountdownToStartTimer);
             _countdownText.text = countdownNumber.ToString();
 
             if (_previousCountdownNumber != countdownNumber)
             {
-                _previousCountdownNumber = countdownNumber;
+                _previousCountdownNumber = countdownNumber;          
                 OnNumberChanged?.Invoke();
             }
         }
