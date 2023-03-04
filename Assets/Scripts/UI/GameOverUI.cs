@@ -9,6 +9,7 @@ namespace KitchenChaos.Core.UI
     public class GameOverUI : MonoBehaviour
     {
         [SerializeField] TextMeshProUGUI _recipesDeliveredText;
+        [SerializeField] TextMeshProUGUI _deliveredScoreText;
         [SerializeField] TextMeshProUGUI _highScoreText;
 
         [SerializeField] Button _restartButton;
@@ -42,6 +43,7 @@ namespace KitchenChaos.Core.UI
             if (!gameObject.activeInHierarchy) return;
             
             _recipesDeliveredText.text = DeliveryManager.Instance.SuccessfulRecipesDelivered.ToString();
+            _deliveredScoreText.text = DeliveryManager.Instance.DeliveredRecipesScore.ToString();
             _highScoreText.text = _highScoreTracker.GetCurrentHighScore().ToString();
         }
 

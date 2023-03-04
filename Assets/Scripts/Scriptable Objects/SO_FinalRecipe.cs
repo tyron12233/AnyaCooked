@@ -13,6 +13,7 @@ namespace KitchenChaos.Interactions
         [SerializeField] string _recipeName;
         public string RecipeName => _recipeName;
 
-        //should have a score field! - track this instead of number of recipes delivered!
+        [SerializeField] int _deliveryPoints;
+        public int DeliveryPoints => _deliveryPoints;
     }
 }

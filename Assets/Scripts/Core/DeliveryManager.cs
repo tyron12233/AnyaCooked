@@ -26,6 +26,9 @@ namespace KitchenChaos.Core
         int _successfulRecipesDelivered;
         public int SuccessfulRecipesDelivered => _successfulRecipesDelivered;
 
+        int _deliveredRecipesScore;
+        public int DeliveredRecipesScore => _deliveredRecipesScore;
+
         private void Awake()
         {
             Instance = this;
@@ -70,7 +73,8 @@ namespace KitchenChaos.Core
                 {
                     Debug.Log("Correct Recipe Delivered!");
                     _successfulRecipesDelivered++;
-                    
+                    _deliveredRecipesScore += recipe.DeliveryPoints;
+
                     _pendingRecipesList.Remove(recipe);
                     OnRecipeDelivered?.Invoke();
                     return;

@@ -13,7 +13,7 @@ namespace KitchenChaos.Core
 
         void DeliveryManager_OnRecipeDelivered()
         {
-            int score = DeliveryManager.Instance.SuccessfulRecipesDelivered;
+            int score = DeliveryManager.Instance.DeliveredRecipesScore;
 
             if (score > GetCurrentHighScore())
                 SaveHighScore(score);
