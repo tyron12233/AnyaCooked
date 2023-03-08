@@ -31,5 +31,5 @@ Saving system is using PlayerPrefs. Since this is just a practice project and th
 As of 22 Feb 2023:
 * pooling instead of spawning
 * fix sound: the countdown sound; burning warning sound - FIXED 04 Mar 2023
-* fix the scoring system - currently all recipes are scored equally - recipes with more ingredients should give more points
+* fix the scoring system - currently all recipes are scored equally - recipes with more ingredients should give more points - FIXED 04 Mar 2023
 * BACKGLOG: instead of spawning plates on the plates counter right away, start with plates on several counters; player should be able to put ingredients directly on the plate if the plate is on the counter; player should be able to put ingredients in a bun even if the bun isn't on a plate; logic and input for boosting the player's movement.
