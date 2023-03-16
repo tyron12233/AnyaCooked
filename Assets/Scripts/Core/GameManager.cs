@@ -39,6 +39,10 @@ namespace KitchenChaos.Core
         void Start()
         {
             _gameInput.OnInteractAction += GameInput_OnInteractAction;
+
+            // DEBUG TRIGGER GAME START AUTOMATICALLY
+            _state = GameplayState.CountdownToStart;
+            OnStateChanged?.Invoke();
         }
 
         void GameInput_OnInteractAction()

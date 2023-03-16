@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using KitchenChaos.Interactions;
-using System.Collections;
+using Unity.Netcode;
 
 namespace KitchenChaos.Core
 {
-    public class DeliveryManager : MonoBehaviour
+    public class DeliveryManager : NetworkBehaviour
     {
         public static DeliveryManager Instance { get; private set; }
 
@@ -15,6 +15,9 @@ namespace KitchenChaos.Core
         public event Action OnRecipeFailed;
 
         [SerializeField] SO_RecipeList _recipeListSO;
+        [Tooltip("Sets the waiting time for the very first recipe")]
+        [SerializeField] float _spawnRecipeTimer = 4f;
+        [Tooltip("Sets the waiting time between recipes")]
         [SerializeField] float _spawnRecipeTimerMax = 4f;
         [SerializeField] int _pendingRecipesMax = 4;
 
@@ -22,7 +25,6 @@ namespace KitchenChaos.Core
         List<SO_FinalRecipe> _pendingRecipesList = new List<SO_FinalRecipe>();
         public List<SO_FinalRecipe> PendingRecipesList => _pendingRecipesList;
 
-        float _spawnRecipeTimer;
         int _successfulRecipesDelivered;
         public int SuccessfulRecipesDelivered => _successfulRecipesDelivered;
 
@@ -36,11 +38,12 @@ namespace KitchenChaos.Core
 
         void Start()
         {
-            _finalRecipesList = _recipeListSO.FinalRecipesList;    
+            _finalRecipesList = _recipeListSO.FinalRecipesList;
         }
 
         void Update()
         {
+            if (!IsServer) return;
             if (!GameManager.Instance.IsGamePlaying()) return;
 
             _spawnRecipeTimer -= Time.deltaTime;
@@ -48,7 +51,6 @@ namespace KitchenChaos.Core
             GenerateNewRecipe();
         }
 
-        //use coroutine, so the recipes don't spawn straight away?
         void GenerateNewRecipe()
         {
             if (_spawnRecipeTimer <= 0f)
@@ -57,10 +59,9 @@ namespace KitchenChaos.Core
 
                 if (_pendingRecipesList.Count < _pendingRecipesMax)
                 {
-                    SO_FinalRecipe recipe = _finalRecipesList[UnityEngine.Random.Range(0, _finalRecipesList.Count)];
-                    Debug.Log(recipe.RecipeName);
-                    _pendingRecipesList.Add(recipe);
-                    OnNewRecipeGenerated?.Invoke();
+                    int pendingRecipeIndex = UnityEngine.Random.Range(0, _finalRecipesList.Count); 
+
+                    GenerateNewRecipeClientRpc(pendingRecipeIndex);
                 }
             }
         }
@@ -71,33 +72,67 @@ namespace KitchenChaos.Core
             {
                 if (DoIngredientsMatch(recipe, plate))
                 {
-                    Debug.Log("Correct Recipe Delivered!");
-                    _successfulRecipesDelivered++;
-                    _deliveredRecipesScore += recipe.DeliveryPoints;
+                    int correctRecipeIndex = _pendingRecipesList.IndexOf(recipe);
+                    DeliverCorrectRecipeServerRpc(correctRecipeIndex);
 
-                    _pendingRecipesList.Remove(recipe);
-                    OnRecipeDelivered?.Invoke();
                     return;
                 }
             }
 
-            OnRecipeFailed?.Invoke();
-            Debug.Log("Wrong Recipe Delivered!");
+            DeliverIncorrectRecipeServerRpc();
         }
 
         bool DoIngredientsMatch(SO_FinalRecipe recipe, PlateKitchenObject plate)
         {
-            if (recipe.KitchenObjectSOList.Count != plate.KitchenObjectsList.Count) 
+            if (recipe.KitchenObjectSOList.Count != plate.KitchenObjectsList.Count)
                 return false;
 
             foreach (var recipeIngredient in recipe.KitchenObjectSOList)
             {
-                if (!plate.KitchenObjectsList.Contains(recipeIngredient)) 
+                if (!plate.KitchenObjectsList.Contains(recipeIngredient))
                     return false;
             }
 
             return true;
         }
 
+        [ClientRpc]
+        void GenerateNewRecipeClientRpc(int pendingRecipeIndex)
+        {
+            SO_FinalRecipe recipe = _finalRecipesList[pendingRecipeIndex];
+            _pendingRecipesList.Add(recipe);
+
+            OnNewRecipeGenerated?.Invoke();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void DeliverCorrectRecipeServerRpc(int correctRecipeIndex)
+        {
+            DeliverCorrectRecipeClientRpc(correctRecipeIndex);
+        }
+
+        [ClientRpc]
+        void DeliverCorrectRecipeClientRpc(int correctRecipeIndex)
+        {
+            SO_FinalRecipe correctRecipe = _pendingRecipesList[correctRecipeIndex];
+
+            _successfulRecipesDelivered++;
+            _deliveredRecipesScore += correctRecipe.DeliveryPoints;
+
+            _pendingRecipesList.RemoveAt(correctRecipeIndex);
+            OnRecipeDelivered?.Invoke();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void DeliverIncorrectRecipeServerRpc()
+        {
+            DeliverIncorrectRecipeClientRpc();
+        }
+
+        [ClientRpc]
+        void DeliverIncorrectRecipeClientRpc()
+        {
+            OnRecipeFailed?.Invoke();
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using KitchenChaos.Core;
 using KitchenChaos.PlayerInput;
@@ -6,15 +7,15 @@ using KitchenChaos.Interactions;
 
 namespace KitchenChaos.Control
 {
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : NetworkBehaviour
     {
-        public static PlayerController Instance { get; private set; }
+        //public static PlayerController Instance { get; private set; }
 
         public event Action<BaseCounter> OnSelectedCounterChanged;
 
         [SerializeField] float _speed = 7f;
         [SerializeField] LayerMask _countersLayer;
-        [SerializeField] GameInput _playerInput;
+        GameInput _playerInput;
 
         bool _isWalking;
         Vector3 _lastInteractDir;
@@ -22,19 +23,16 @@ namespace KitchenChaos.Control
         PlayerInteractions _player;
 
         void Awake()
-        {
-            if (Instance != null)
-                Debug.LogError("There is more than one PlayerController instance!");
-            
-            Instance = this;
+        {           
+            //Instance = this;
             _player = GetComponent<PlayerInteractions>();
         }
 
         void Start()
         {
+            _playerInput = FindObjectOfType<GameInput>();
             _playerInput.OnInteractAction += _playerInput_OnInteractAction;
             _playerInput.OnInteractAltAction += _playerInput_OnInteractAltAction;
-
         }
 
         private void _playerInput_OnInteractAltAction()
@@ -55,6 +53,8 @@ namespace KitchenChaos.Control
 
         void Update()
         {
+            if (!IsOwner) return;
+
             HandleMovement();
             HandleInteractions();
         }
@@ -135,7 +135,7 @@ namespace KitchenChaos.Control
             OnSelectedCounterChanged?.Invoke(_selectedCounter);
         }
 
-        void OnDestroy()
+        new void OnDestroy()
         {
             _playerInput.OnInteractAction -= _playerInput_OnInteractAction;
             _playerInput.OnInteractAltAction -= _playerInput_OnInteractAltAction;

@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 namespace KitchenChaos.Control
 {
-    public class PlayerAnimator : MonoBehaviour
+    public class PlayerAnimator : NetworkBehaviour
     {
         [SerializeField] PlayerController _player;
         
@@ -18,6 +17,8 @@ namespace KitchenChaos.Control
 
         void Update()
         {
+            if (!IsOwner) return;
+
             _animator.SetBool(IS_WALKING, _player.IsWalking());
         }
     }

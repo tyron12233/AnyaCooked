@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 namespace KitchenChaos.Interactions
 {
-    public class PlayerInteractions : MonoBehaviour, IKitchenObjectHolder
+    public class PlayerInteractions : NetworkBehaviour, IKitchenObjectHolder
     {
         public static event Action<PlayerInteractions> OnPickedSomething;
         
