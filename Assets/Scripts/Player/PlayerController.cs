@@ -9,8 +9,9 @@ namespace KitchenChaos.Control
 {
     public class PlayerController : NetworkBehaviour
     {
-        //public static PlayerController Instance { get; private set; }
+        public static PlayerController LocalInstance { get; private set; }
 
+        public static event Action OnAnyPlayerSpawned;
         public event Action<BaseCounter> OnSelectedCounterChanged;
 
         [SerializeField] float _speed = 7f;
@@ -22,10 +23,15 @@ namespace KitchenChaos.Control
         BaseCounter _selectedCounter;
         PlayerInteractions _player;
 
-        void Awake()
-        {           
-            //Instance = this;
+        public override void OnNetworkSpawn()
+        {
+            if (!IsOwner) return;
+
+            LocalInstance = this;
+            OnAnyPlayerSpawned?.Invoke();
             _player = GetComponent<PlayerInteractions>();
+
+            Debug.Log("Subscribers: " + OnSelectedCounterChanged.GetInvocationList().Length);
         }
 
         void Start()
@@ -139,6 +145,11 @@ namespace KitchenChaos.Control
         {
             _playerInput.OnInteractAction -= _playerInput_OnInteractAction;
             _playerInput.OnInteractAltAction -= _playerInput_OnInteractAltAction;
+        }
+
+        public static void ResetStaticData()
+        {
+            OnAnyPlayerSpawned = null;
         }
     }
 }

@@ -10,7 +10,15 @@ namespace KitchenChaos.Interactions.Visual
 
         void Start()
         {
-            //PlayerController.Instance.OnSelectedCounterChanged += PlayerController_OnSelectedCounterChanged;
+            if (PlayerController.LocalInstance != null) return;
+
+            PlayerController.OnAnyPlayerSpawned += PlayerController_OnAnyPlayerSpawned;
+        }
+
+        private void PlayerController_OnAnyPlayerSpawned()
+        {
+            //PlayerController.LocalInstance.OnSelectedCounterChanged -= PlayerController_OnSelectedCounterChanged;
+            PlayerController.LocalInstance.OnSelectedCounterChanged += PlayerController_OnSelectedCounterChanged;
         }
 
         void PlayerController_OnSelectedCounterChanged(BaseCounter selectedCounter)
@@ -25,7 +33,7 @@ namespace KitchenChaos.Interactions.Visual
 
         void OnDestroy()
         {
-            //PlayerController.Instance.OnSelectedCounterChanged -= PlayerController_OnSelectedCounterChanged;
+            PlayerController.LocalInstance.OnSelectedCounterChanged -= PlayerController_OnSelectedCounterChanged;
         }
     }
 }

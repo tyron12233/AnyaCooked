@@ -1,4 +1,5 @@
 using UnityEngine;
+using KitchenChaos.Control;
 using KitchenChaos.Interactions;
 using KitchenChaos.Core.UI;
 
@@ -8,6 +9,7 @@ namespace KitchenChaos.Core
     {
         private void Awake()
         {
+            PlayerController.ResetStaticData();
             PlayerInteractions.ResetStaticData();
             BaseCounter.ResetStaticData();
             CuttingCounter.ResetStaticData();
