@@ -1,6 +1,7 @@
 # Kitchen Chaos
 
-A simpler version of *Overcooked*, currently single player, one level. Playable with keyboard and gamepad. 
+A simpler version of *Overcooked*, currently single player, one level. Playable with keyboard and gamepad.<br>
+Implementation of multiplayer is ongoing.
 ***
 ### Overview
 The player is enclosed in a kitchen. Recipes are lining up. The player has to use correct ingredients to deliver a correct recipe. Vegetables and cheese have to be chopped, the meat has to be fried and everything has to be combined in a bun on a plate. The player has to deliver as many recipes as (s)he can before the level timer runs out. There is currently a limited selection of recipes available.
