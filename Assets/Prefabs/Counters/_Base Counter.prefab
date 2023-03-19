@@ -41,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7241186574240973260}
   - component: {fileID: 7241186574240973299}
+  - component: {fileID: 4704724227609804836}
   m_Layer: 6
   m_Name: _Base Counter
   m_TagString: Untagged
@@ -78,6 +79,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.5, y: 1.5, z: 1.5}
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!114 &4704724227609804836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7241186574240973298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &8689972363846216081
 GameObject:
   m_ObjectHideFlags: 0
@@ -122,5 +139,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 237309cc07f03c447aa8acead1ffac86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _clearCounter: {fileID: 0}
+  _counter: {fileID: 0}
   _selectedCounterVisual: {fileID: 0}

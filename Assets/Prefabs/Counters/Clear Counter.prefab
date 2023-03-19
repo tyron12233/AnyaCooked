@@ -245,8 +245,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a590552407821c48aa035025f5aec04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _kitchenObjectSO: {fileID: 11400000, guid: 24261022485159e4fbe63aeaf5cf8ad1, type: 2}
   _spawnPoint: {fileID: 912784035020840763}
+--- !u!114 &5372628161191020285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302488706652372884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!4 &1302488706652372906 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7241186574240973260, guid: ee289ec961940c04899fbbd8795b6210, type: 3}

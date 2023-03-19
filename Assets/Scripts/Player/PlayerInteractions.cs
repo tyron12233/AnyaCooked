@@ -45,5 +45,12 @@ namespace KitchenChaos.Interactions
         {
             OnPickedSomething = null;
         }
+
+        public NetworkObject GetNetworkObject()
+        {
+            // since this class is a NetworkBehaviour,
+            // we can just retrieve the attached NetworkObject
+            return NetworkObject;
+        }
     }
 }

@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace KitchenChaos.Interactions
@@ -11,5 +10,6 @@ namespace KitchenChaos.Interactions
         KitchenObject GetKitchenObject();
         void ClearKitchenObject();
         bool HasKitchenObject();
+        NetworkObject GetNetworkObject();
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Unity.Netcode;
 
 namespace KitchenChaos.Interactions
 {
@@ -18,7 +19,7 @@ namespace KitchenChaos.Interactions
                 else
                 {
                     KitchenObject.SpawnKitchenObject(_kitchenObjectSO, player);
-                    OnPlayerGrabbedObject?.Invoke();
+                    InteractLogicServerRpc();
                 }
             }
             else
@@ -31,6 +32,18 @@ namespace KitchenChaos.Interactions
                         AttemptTransferFromPlayerToPlate(player);
                 }
             }               
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void InteractLogicServerRpc()
+        {
+            InteractLogicClientRpc();
+        }
+
+        [ClientRpc]
+        void InteractLogicClientRpc()
+        {
+            OnPlayerGrabbedObject?.Invoke();
         }
     }
 }

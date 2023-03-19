@@ -1,8 +1,10 @@
 using UnityEngine;
+using Unity.Netcode;
+using KitchenChaos.Interactions.Multiplayer;
 
 namespace KitchenChaos.Interactions
 {
-    public class KitchenObject : MonoBehaviour
+    public class KitchenObject : NetworkBehaviour
     {
         [SerializeField] SO_KitchenObject _kitchenObjectSO;
         public SO_KitchenObject KitchenObjectSO => _kitchenObjectSO;
@@ -17,8 +19,31 @@ namespace KitchenChaos.Interactions
             set { _cuttingTracker = value; }
         }
 
+        FollowTransform _followTransform;
+
+        void Awake()
+        {
+            _followTransform = GetComponent<FollowTransform>();
+        }
+
         public void SetKitchenObjectHolder(IKitchenObjectHolder kitchenObjectHolder)
         {
+            SetKitchenObjectHolderServerRpc(kitchenObjectHolder.GetNetworkObject());
+        }
+
+        //this will only run on the server
+        [ServerRpc(RequireOwnership = false)]
+        void SetKitchenObjectHolderServerRpc(NetworkObjectReference kitchenObjectHolder_NetworkObjRef)
+        {
+            SetKitchenObjectHolderClientRpc(kitchenObjectHolder_NetworkObjRef);
+        }
+
+        [ClientRpc]
+        void SetKitchenObjectHolderClientRpc(NetworkObjectReference kitchenObjectHolder_NetworkObjRef)
+        {
+            kitchenObjectHolder_NetworkObjRef.TryGet(out NetworkObject kitchenObjectHolder_NetworkObject);
+            IKitchenObjectHolder kitchenObjectHolder = kitchenObjectHolder_NetworkObject.GetComponent<IKitchenObjectHolder>();
+
             if (_kitchenObjectHolder != null)
                 _kitchenObjectHolder.ClearKitchenObject();
 
@@ -29,8 +54,7 @@ namespace KitchenChaos.Interactions
 
             _kitchenObjectHolder.SetKitchenObject(this);
 
-            transform.parent = _kitchenObjectHolder.GetKitchenObjectSpawnPoint();
-            transform.localPosition = Vector3.zero;
+            _followTransform.SetTargetTransform(_kitchenObjectHolder.GetKitchenObjectSpawnPoint());
         }
 
         public bool TryGetPlate(out PlateKitchenObject plate)
@@ -54,14 +78,9 @@ namespace KitchenChaos.Interactions
             Destroy(gameObject);
         }
 
-        //for prototyping only - implement pooling
-        public static KitchenObject SpawnKitchenObject(SO_KitchenObject kitchenObjectSO, IKitchenObjectHolder kitchenObjectHolder)
+        public static void SpawnKitchenObject(SO_KitchenObject kitchenObjectSO, IKitchenObjectHolder kitchenObjectHolder)
         {
-            Transform kitchenObjectTransform = Instantiate(kitchenObjectSO.KitchenObjectPrefab);
-            KitchenObject kitchenObject = kitchenObjectTransform.GetComponent<KitchenObject>();
-            kitchenObject.SetKitchenObjectHolder(kitchenObjectHolder);
-
-            return kitchenObject;
+            GameMultiplayer.Instance.SpawnKitchenObject(kitchenObjectSO, kitchenObjectHolder);
         }
     }
 }

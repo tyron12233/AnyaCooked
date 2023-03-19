@@ -1,11 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace KitchenChaos.Interactions
 {
-    public class BaseCounter : MonoBehaviour, IKitchenObjectHolder
+    public class BaseCounter : NetworkBehaviour, IKitchenObjectHolder
     {
         public static event Action<BaseCounter> OnAnyObjectPlaced;
 
@@ -76,6 +77,11 @@ namespace KitchenChaos.Interactions
         public static void ResetStaticData()
         {
             OnAnyObjectPlaced = null;
+        }
+
+        public NetworkObject GetNetworkObject()
+        {
+            return NetworkObject;
         }
     }
 }
