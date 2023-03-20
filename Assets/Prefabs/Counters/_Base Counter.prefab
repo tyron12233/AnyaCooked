@@ -41,7 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7241186574240973260}
   - component: {fileID: 7241186574240973299}
-  - component: {fileID: 4704724227609804836}
+  - component: {fileID: 5063482198733727915}
   m_Layer: 6
   m_Name: _Base Counter
   m_TagString: Untagged
@@ -64,7 +64,7 @@ Transform:
   - {fileID: 8689972363846216080}
   - {fileID: 8846299469396730205}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!65 &7241186574240973299
 BoxCollider:
@@ -79,7 +79,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.5, y: 1.5, z: 1.5}
   m_Center: {x: 0, y: 0.5, z: 0}
---- !u!114 &4704724227609804836
+--- !u!114 &5063482198733727915
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

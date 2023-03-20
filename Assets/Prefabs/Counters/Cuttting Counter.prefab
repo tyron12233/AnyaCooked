@@ -195,6 +195,10 @@ PrefabInstance:
       propertyPath: _selectedCounterVisual
       value: 
       objectReference: {fileID: 973047869965829475}
+    - target: {fileID: 5063482198733727915, guid: ee289ec961940c04899fbbd8795b6210, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 951099334
+      objectReference: {fileID: 0}
     - target: {fileID: 7241186574240973260, guid: ee289ec961940c04899fbbd8795b6210, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -282,6 +286,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spawnPoint: {fileID: 3789876470057440909}
+  _testRecipe: {fileID: 0}
+  _cuttingRecipes:
+  - {fileID: 11400000, guid: 1be7395f7b3fd6d428761dfe7116a6a7, type: 2}
+  - {fileID: 11400000, guid: 4cb2a8e0dd4e7e244b0a0462a0afc826, type: 2}
+  - {fileID: 11400000, guid: 7f273ff1dc6839441955bbe8278193a7, type: 2}
 --- !u!4 &3789876470057440909 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8846299469396730205, guid: ee289ec961940c04899fbbd8795b6210, type: 3}

@@ -161,9 +161,13 @@ PrefabInstance:
       propertyPath: _selectedCounterVisual
       value: 
       objectReference: {fileID: 8393019865088563919}
+    - target: {fileID: 4704724227609804836, guid: ee289ec961940c04899fbbd8795b6210, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 951099334
+      objectReference: {fileID: 0}
     - target: {fileID: 7241186574240973260, guid: ee289ec961940c04899fbbd8795b6210, type: 3}
       propertyPath: m_RootOrder
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 7241186574240973260, guid: ee289ec961940c04899fbbd8795b6210, type: 3}
       propertyPath: m_LocalPosition.x
@@ -246,22 +250,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spawnPoint: {fileID: 912784035020840763}
---- !u!114 &5372628161191020285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1302488706652372884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 951099334
-  AlwaysReplicateAsRoot: 0
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
 --- !u!4 &1302488706652372906 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7241186574240973260, guid: ee289ec961940c04899fbbd8795b6210, type: 3}

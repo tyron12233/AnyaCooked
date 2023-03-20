@@ -1,5 +1,6 @@
-
 using System;
+using Unity.Netcode;
+using UnityEngine;
 
 namespace KitchenChaos.Interactions
 {
@@ -10,6 +11,8 @@ namespace KitchenChaos.Interactions
         public event Action OnCut;
 
         SO_CuttingRecipe _currentCuttingRecipe;
+        
+        [SerializeField] SO_CuttingRecipe[] _cuttingRecipes;
 
         public override void Interact(PlayerInteractions player)
         {
@@ -17,15 +20,10 @@ namespace KitchenChaos.Interactions
             {
                 if (player.HasKitchenObject())
                 {
-                    player.GetKitchenObject().SetKitchenObjectHolder(this);
+                    KitchenObject kitchenObject = player.GetKitchenObject();
+                    kitchenObject.SetKitchenObjectHolder(this);
 
-                    if (CanBeCut())
-                    {
-                        _currentCuttingRecipe = GetKitchenObject().KitchenObjectSO.GetCuttingRecipe();
-                        
-                        if (GetKitchenObject().CuttingTracker != 0)
-                            OnProgressChanged?.Invoke(GetProgressNormalized());
-                    }
+                    SetRecipeServerRpc();
                 }
             }
             else
@@ -33,10 +31,7 @@ namespace KitchenChaos.Interactions
                 if (!player.HasKitchenObject())
                 {
                     if (CanBeCut())
-                    {
-                        OnProgressChanged?.Invoke(0);
-                        _currentCuttingRecipe = null;
-                    }
+                        ClearCounterServerRpc();
 
                     GetKitchenObject().SetKitchenObjectHolder(player);
                 }
@@ -48,22 +43,88 @@ namespace KitchenChaos.Interactions
             }
         }
 
+        #region MULTIPLAYER_INTERACT_LOGIC
+
+        [ServerRpc(RequireOwnership = false)]
+        void SetRecipeServerRpc()
+        {
+            SetRecipeClientRpc();
+        }
+
+        [ClientRpc]
+        void SetRecipeClientRpc()
+        {
+            if (CanBeCut())
+            {
+                _currentCuttingRecipe = GetCurrentCuttingRecipe(GetKitchenObject().KitchenObjectSO);
+
+                if (GetKitchenObject().CuttingTracker != 0)
+                    OnProgressChanged?.Invoke(GetProgressNormalized());
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void ClearCounterServerRpc()
+        {
+            ClearCounterClientRpc();
+        }
+
+        [ClientRpc]
+        void ClearCounterClientRpc()
+        {
+            OnProgressChanged?.Invoke(0);
+            _currentCuttingRecipe = null;
+        }
+
+        SO_CuttingRecipe GetCurrentCuttingRecipe(SO_KitchenObject kitchenObject)
+        {
+            foreach (var recipe in _cuttingRecipes)
+            {
+                if (recipe.Input == kitchenObject)
+                    return recipe;
+            }
+            return null;
+        }
+
+        #endregion
+
         public override void InteractAlt(PlayerInteractions player)
         {
             if (!HasKitchenObject() || player.HasKitchenObject() || !CanBeCut()) return;
 
+            CutObjectServerRpc();
+            TestCuttingProgressDoneServerRpc();
+        }
+
+        #region MULTIPLAYER_INTERACTALT_LOGIC
+
+        [ServerRpc(RequireOwnership = false)]
+        void CutObjectServerRpc()
+        {
+            CutObjectClientRpc();
+        }
+
+        [ClientRpc]
+        void CutObjectClientRpc()
+        {
             float cuttingProgress = AddCuts();
             OnCut?.Invoke();
             OnAnyCut?.Invoke(this);
             OnProgressChanged?.Invoke(cuttingProgress);
-            
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void TestCuttingProgressDoneServerRpc()
+        {
             if (FinishedCutting())
             {
-                GetKitchenObject().DestroySelf();
+                KitchenObject.DestroyKitchenObject(GetKitchenObject());
                 KitchenObject.SpawnKitchenObject(GetCuttingOutput(), this);
-                _currentCuttingRecipe = null; 
+                _currentCuttingRecipe = null;
             }
         }
+
+        #endregion
 
         bool FinishedCutting()
         {
