@@ -1,7 +1,4 @@
 using KitchenChaos.Core;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace KitchenChaos.Interactions
 {
@@ -15,7 +12,7 @@ namespace KitchenChaos.Interactions
                 {
                     DeliveryManager.Instance.DeliverRecipe(plate);
 
-                    player.GetKitchenObject().DestroySelf();
+                    KitchenObject.DestroyKitchenObject(player.GetKitchenObject());
                 }
             }
         }

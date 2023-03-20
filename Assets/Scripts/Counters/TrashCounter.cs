@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace KitchenChaos.Interactions
@@ -13,10 +14,24 @@ namespace KitchenChaos.Interactions
         {
             if (player.HasKitchenObject())
             {
-                OnAnyObjectTrashed?.Invoke(this);
-                player.GetKitchenObject().DestroySelf();
+                KitchenObject.DestroyKitchenObject(player.GetKitchenObject());
+
+                InteractLogicServerRpc();
             }
         }
+
+        [ServerRpc(RequireOwnership = false)]
+        void InteractLogicServerRpc()
+        {
+            InteractLogicClientRpc();
+        }
+
+        [ClientRpc]
+        void InteractLogicClientRpc()
+        {
+            OnAnyObjectTrashed?.Invoke(this);
+        }
+
 
         new public static void ResetStaticData()
         {

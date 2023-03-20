@@ -57,5 +57,30 @@ namespace KitchenChaos.Interactions.Multiplayer
         {
             return _kitchenObjectListSO.KitchenObjectList[kitchenObjectSOIndex];
         }
+
+        public void DestroyKitchenObject(KitchenObject kitchenObject)
+        {
+            DestroyKitchenObjectServerRpc(kitchenObject.NetworkObject);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void DestroyKitchenObjectServerRpc(NetworkObjectReference kitchenObject_NetworkObjRef)
+        {
+            kitchenObject_NetworkObjRef.TryGet(out NetworkObject kitchenObject_NetworkObject);
+            KitchenObject kitchenObject = kitchenObject_NetworkObject.GetComponent<KitchenObject>();
+
+            ClearKitchenObjectHolderClientRpc(kitchenObject_NetworkObjRef);
+            //only server can destroy objects
+            kitchenObject.DestroySelf();
+        }
+
+        [ClientRpc]
+        void ClearKitchenObjectHolderClientRpc(NetworkObjectReference kitchenObject_NetworkObjRef)
+        {
+            kitchenObject_NetworkObjRef.TryGet(out NetworkObject kitchenObject_NetworkObject);
+            KitchenObject kitchenObject = kitchenObject_NetworkObject.GetComponent<KitchenObject>();
+
+            kitchenObject.ClearKitchenObjectHolder();
+        }
     }
 }

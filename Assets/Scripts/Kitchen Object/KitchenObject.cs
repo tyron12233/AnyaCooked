@@ -74,13 +74,24 @@ namespace KitchenChaos.Interactions
         //for prototyping only - implement pooling
         public void DestroySelf()
         {
+            Destroy(gameObject); 
+        }
+        
+        //refactored DestroySelf() to run this logic on client
+        public void ClearKitchenObjectHolder()
+        {
             _kitchenObjectHolder.ClearKitchenObject();
-            Destroy(gameObject);
         }
 
         public static void SpawnKitchenObject(SO_KitchenObject kitchenObjectSO, IKitchenObjectHolder kitchenObjectHolder)
         {
             GameMultiplayer.Instance.SpawnKitchenObject(kitchenObjectSO, kitchenObjectHolder);
         }
+
+        public static void DestroyKitchenObject(KitchenObject kitchenObject)
+        {
+            GameMultiplayer.Instance.DestroyKitchenObject(kitchenObject);
+        }
+
     }
 }
