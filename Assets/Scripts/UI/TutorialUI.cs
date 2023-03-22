@@ -25,14 +25,16 @@ namespace KitchenChaos.PlayerInput.UI
         void Start()
         {
             _gameInput.OnBindingRebind += GameInput_OnBindingRebind;
-            GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
+            GameManager.Instance.OnLocalPlayerReadyChanged += GameManager_OnLocalPlayerReadyChanged;
             UpdateVisual();
             
         }
 
-        void GameManager_OnStateChanged()
+        void GameManager_OnLocalPlayerReadyChanged()
         {
-            if (GameManager.Instance.IsCountdownActive())
+            // CONSIDER implementing the ability to "unready" the player
+            // otherwise remove the bool check
+            if (GameManager.Instance.IsLocalPlayerReady)
                 gameObject.SetActive(false);
         }
 
@@ -68,7 +70,7 @@ namespace KitchenChaos.PlayerInput.UI
         void OnDestroy()
         {
             _gameInput.OnBindingRebind -= GameInput_OnBindingRebind;
-            GameManager.Instance.OnStateChanged -= GameManager_OnStateChanged;
+            GameManager.Instance.OnStateChanged -= GameManager_OnLocalPlayerReadyChanged;
         }
     }
 }

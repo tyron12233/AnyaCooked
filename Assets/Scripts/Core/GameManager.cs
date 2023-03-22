@@ -1,24 +1,30 @@
 using KitchenChaos.PlayerInput;
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace KitchenChaos.Core
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : NetworkBehaviour
     {
         //use service locator, there are quite a few singletons already
         public static GameManager Instance { get; private set; }
-        //take in a state parameter?
         public event Action OnStateChanged;
+        public event Action OnLocalPlayerReadyChanged;
 
         [SerializeField] GameInput _gameInput;
-        [SerializeField] float _countdownToStartTimer = 3f;
+        [SerializeField] NetworkVariable<float> _countdownToStartTimer = new NetworkVariable<float>(3f);
+        public float CountdownToStartTimer => _countdownToStartTimer.Value;
+        
         [SerializeField] float _playingTimerMax = 10f;
 
-        float _playingTimer;
-        public float CountdownToStartTimer => _countdownToStartTimer;
-        
+        NetworkVariable<float> _playingTimer = new NetworkVariable<float>(0f);
+        bool _isLocalPlayerReady;
+        public bool IsLocalPlayerReady => _isLocalPlayerReady;
+
+        Dictionary<ulong, bool> _playerReadyDictionary;
+
         enum GameplayState
         {
             WaitingToStart,
@@ -27,36 +33,70 @@ namespace KitchenChaos.Core
             GameOver,
         }
 
-        GameplayState _state;
+        NetworkVariable<GameplayState> _state= new NetworkVariable<GameplayState>(GameplayState.WaitingToStart);
         Dictionary<GameplayState, Action> _updateMethods = new Dictionary<GameplayState, Action>();
 
         void Awake()
         {
             Instance = this;
-            FillStateDictionary();    
+            FillStateDictionary();
+
+            _playerReadyDictionary = new Dictionary<ulong, bool>();
         }
 
         void Start()
         {
             _gameInput.OnInteractAction += GameInput_OnInteractAction;
+        }
 
-            // DEBUG TRIGGER GAME START AUTOMATICALLY
-            _state = GameplayState.CountdownToStart;
+        public override void OnNetworkSpawn()
+        {
+            _state.OnValueChanged += GameplayState_OnValueChanged;
+        }
+
+        void GameplayState_OnValueChanged(GameplayState previousValue, GameplayState newValue)
+        {
             OnStateChanged?.Invoke();
         }
 
         void GameInput_OnInteractAction()
         {
-            if (_state == GameplayState.WaitingToStart)
+            if (_state.Value == GameplayState.WaitingToStart)
             {
-                _state = GameplayState.CountdownToStart;
-                OnStateChanged?.Invoke();
+                _isLocalPlayerReady = true;
+                OnLocalPlayerReadyChanged?.Invoke();
+                
+                SetPlayerReadyServerRpc();
             }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            _playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
+
+            bool allClientsReady = true;
+
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                // all players are not ready if the dict doesn't contain a clientId or
+                // it does, but the value is false
+                if (!_playerReadyDictionary.ContainsKey(clientId) || !_playerReadyDictionary[clientId])
+                {
+                    allClientsReady = false;
+                    break;
+                }
+            }
+
+            if (allClientsReady)
+                _state.Value = GameplayState.CountdownToStart;
         }
 
         void Update()
         {
-            _updateMethods[_state].Invoke();
+            if (!IsServer) return;
+
+            _updateMethods[_state.Value].Invoke();
         }
 
         void FillStateDictionary()
@@ -73,23 +113,20 @@ namespace KitchenChaos.Core
 
         void UpdateCountdownToStart()
         {
-            _countdownToStartTimer -= Time.deltaTime;
-            if (_countdownToStartTimer < 0f)
+            _countdownToStartTimer.Value -= Time.deltaTime;
+            if (_countdownToStartTimer.Value < 0f)
             {
-                _state = GameplayState.GamePlayingTime;
-                _playingTimer = _playingTimerMax;
-
-                OnStateChanged?.Invoke();
+                _state.Value = GameplayState.GamePlayingTime;
+                _playingTimer.Value = _playingTimerMax;
             }
         }
 
         void UpdateGamePlayingTime()
         {
-            _playingTimer -= Time.deltaTime;
-            if (_playingTimer < 0f)
+            _playingTimer.Value -= Time.deltaTime;
+            if (_playingTimer.Value < 0f)
             {
-                _state = GameplayState.GameOver;
-                OnStateChanged?.Invoke();
+                _state.Value = GameplayState.GameOver;
             }
         }
 
@@ -99,27 +136,27 @@ namespace KitchenChaos.Core
 
         public bool IsWaitingToStart()
         {
-            return _state == GameplayState.WaitingToStart;
+            return _state.Value == GameplayState.WaitingToStart;
         }
 
         public bool IsGamePlaying()
         {
-            return _state == GameplayState.GamePlayingTime;
+            return _state.Value == GameplayState.GamePlayingTime;
         }
 
         public bool IsCountdownActive()
         {
-            return _state == GameplayState.CountdownToStart;
+            return _state.Value == GameplayState.CountdownToStart;
         }
 
         public bool IsGameOver()
         {
-            return _state == GameplayState.GameOver;
+            return _state.Value == GameplayState.GameOver;
         }
 
         public float GetGamePlayingTimeNormalized()
         {
-            return 1 - (_playingTimer / _playingTimerMax);
+            return 1 - (_playingTimer.Value / _playingTimerMax);
         }
     }
 }
