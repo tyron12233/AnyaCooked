@@ -1,6 +1,7 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using KitchenChaos.Interactions.Multiplayer;
 
 namespace KitchenChaos.Interactions
 {
@@ -12,6 +13,8 @@ namespace KitchenChaos.Interactions
 
         SO_CuttingRecipe _currentCuttingRecipe;
         
+        // TRY getting the kitchenobject SO from index (GameMultiplayer) instead of this
+        // and getting the recipe from that in SetRecipe etc.
         [SerializeField] SO_CuttingRecipe[] _cuttingRecipes;
 
         public override void Interact(PlayerInteractions player)
@@ -23,7 +26,8 @@ namespace KitchenChaos.Interactions
                     KitchenObject kitchenObject = player.GetKitchenObject();
                     kitchenObject.SetKitchenObjectHolder(this);
 
-                    SetRecipeServerRpc();
+                    SetRecipeServerRpc(
+                        GameMultiplayer.Instance.GetKitchenObjectSOIndex(kitchenObject.KitchenObjectSO));
                 }
             }
             else
@@ -46,17 +50,19 @@ namespace KitchenChaos.Interactions
         #region MULTIPLAYER_INTERACT_LOGIC
 
         [ServerRpc(RequireOwnership = false)]
-        void SetRecipeServerRpc()
+        void SetRecipeServerRpc(int kitchenObjectSOIndex)
         {
-            SetRecipeClientRpc();
+            SetRecipeClientRpc(kitchenObjectSOIndex);
         }
 
         [ClientRpc]
-        void SetRecipeClientRpc()
+        void SetRecipeClientRpc(int kitchenObjectSOIndex)
         {
             if (CanBeCut())
             {
-                _currentCuttingRecipe = GetCurrentCuttingRecipe(GetKitchenObject().KitchenObjectSO);
+                //_currentCuttingRecipe = GetCurrentCuttingRecipe(GetKitchenObject().KitchenObjectSO);
+                SO_KitchenObject kitchenObjectSO = GameMultiplayer.Instance.GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+                _currentCuttingRecipe = kitchenObjectSO.GetCuttingRecipe();
 
                 if (GetKitchenObject().CuttingTracker != 0)
                     OnProgressChanged?.Invoke(GetProgressNormalized());

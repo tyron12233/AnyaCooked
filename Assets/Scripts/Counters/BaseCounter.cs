@@ -57,7 +57,8 @@ namespace KitchenChaos.Interactions
             if (player.GetKitchenObject().TryGetPlate(out PlateKitchenObject plate))
             {
                 plate.TryAddIngredient(GetKitchenObject().KitchenObjectSO);
-                GetKitchenObject().DestroySelf();
+                KitchenObject.DestroyKitchenObject(GetKitchenObject());
+
                 return true;
             }
             return false;
@@ -70,7 +71,7 @@ namespace KitchenChaos.Interactions
                 KitchenObject playerKitchenObject = player.GetKitchenObject();
 
                 if (plate.TryAddIngredient(playerKitchenObject.KitchenObjectSO))
-                    playerKitchenObject.DestroySelf();
+                    KitchenObject.DestroyKitchenObject(playerKitchenObject);
             }
         }
 

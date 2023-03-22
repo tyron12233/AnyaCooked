@@ -48,12 +48,12 @@ namespace KitchenChaos.Interactions.Multiplayer
             kitchenObject.SetKitchenObjectHolder(kitchenObjectHolder);
         }
 
-        int GetKitchenObjectSOIndex(SO_KitchenObject kitchenObjectSO)
+        public int GetKitchenObjectSOIndex(SO_KitchenObject kitchenObjectSO)
         {
             return _kitchenObjectListSO.KitchenObjectList.IndexOf(kitchenObjectSO);
         }
 
-        SO_KitchenObject GetKitchenObjectSOFromIndex(int kitchenObjectSOIndex)
+        public SO_KitchenObject GetKitchenObjectSOFromIndex(int kitchenObjectSOIndex)
         {
             return _kitchenObjectListSO.KitchenObjectList[kitchenObjectSOIndex];
         }

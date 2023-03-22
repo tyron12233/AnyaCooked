@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PixelRect:
     serializedVersion: 2
-    x: 1920
+    x: 0
     y: 43
     width: 1920
     height: 1117
   m_ShowMode: 4
-  m_Title: Console
+  m_Title: Project
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ConsoleWindow
+  m_Name: ProjectBrowser
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -244,15 +244,15 @@ MonoBehaviour:
     y: 689
     width: 1472
     height: 378
-  m_MinSize: {x: 101, y: 121}
-  m_MaxSize: {x: 4001, y: 4021}
-  m_ActualView: {fileID: 18}
+  m_MinSize: {x: 231, y: 271}
+  m_MaxSize: {x: 10001, y: 10021}
+  m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
   - {fileID: 18}
   - {fileID: 19}
-  m_Selected: 1
-  m_LastSelected: 0
+  m_Selected: 0
+  m_LastSelected: 1
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -399,7 +399,7 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 1920
+    x: 0
     y: 73
     width: 1125
     height: 668
@@ -1444,7 +1444,7 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 3046
+    x: 1126
     y: 73
     width: 344
     height: 668
@@ -1455,9 +1455,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 
+      m_SelectedIDs: c2190000
       m_LastClickedID: 0
-      m_ExpandedIDs: e888feff9689feffbe8cfeff648dfeff9497feff9635ffff4436ffff6c39ffff103affff3e44ffff16dfffffc4dfffffece2ffff90e3ffffbeedffff06fbfffffee30100ea610300
+      m_ExpandedIDs: 06fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1501,7 +1501,7 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 1920
+    x: 0
     y: 762
     width: 1471
     height: 357
@@ -1522,22 +1522,22 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scriptable Objects/Cutting Recipes
+    - Assets/Scripts/Counters
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Scriptable Objects/Cutting Recipes
+  - Assets/Scripts/Counters
   m_LastFoldersGridSize: 16
   m_LastProjectPath: D:\UNITY\KitchenChaos
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 35}
-    m_SelectedIDs: 58f70100
-    m_LastClickedID: 128856
-    m_ExpandedIDs: 00000000e2830000e483000052f70100
+    scrollPos: {x: 0, y: 0}
+    m_SelectedIDs: 46840000
+    m_LastClickedID: 33862
+    m_ExpandedIDs: 00000000e2830000e483000038840000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1641,7 +1641,7 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 1920
+    x: 0
     y: 762
     width: 1471
     height: 357
@@ -1700,7 +1700,7 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 3392
+    x: 1472
     y: 73
     width: 447
     height: 1046

@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
+using KitchenChaos.Interactions.Multiplayer;
 
 namespace KitchenChaos.Interactions
 {
@@ -18,23 +20,48 @@ namespace KitchenChaos.Interactions
             Burned,
         }
 
-        State _state;
         SO_FryingRecipe _currentFryingRecipe;
         SO_BurningRecipe _currentBurningRecipe;
-        float _fryingTimer;
-        float _burningTimer;
+        
+        NetworkVariable<State> _state = new NetworkVariable<State>(State.Idle);
+        NetworkVariable<float> _fryingTimer = new NetworkVariable<float>(0f);
+        NetworkVariable<float> _burningTimer = new NetworkVariable<float>(0f);
 
-        void Start()
+        public override void OnNetworkSpawn()
         {
-            _state = State.Idle;
+            _fryingTimer.OnValueChanged += FryingTimer_OnValueChanged;
+            _burningTimer.OnValueChanged += BurningTimer_OnValueChanged;
+            _state.OnValueChanged += State_OnValueChanged;
+        }
+
+        void FryingTimer_OnValueChanged(float previousValue, float newValue)
+        {
+            float fryingTimerMax = _currentFryingRecipe != null ? _currentFryingRecipe.FryingTimerMax : 1f;
+
+            OnProgressChanged?.Invoke(GetProgressNormalized(_fryingTimer.Value, fryingTimerMax));
+        }
+
+        void BurningTimer_OnValueChanged(float previousValue, float newValue)
+        {
+            float burningTimerMax = _currentBurningRecipe != null ? _currentBurningRecipe.BurningTimerMax : 1f;
+
+            OnProgressChanged?.Invoke(GetProgressNormalized(_burningTimer.Value, burningTimerMax));
+        }
+
+        void State_OnValueChanged(State previousState, State newState)
+        {
+            OnStateChanged?.Invoke(_state.Value, this);
+
+            if (_state.Value == State.Idle || _state.Value == State.Burned)
+                OnProgressChanged?.Invoke(0);
         }
 
         void Update()
         {
+            if (!IsServer) return;
             if (!HasKitchenObject()) return;
 
-            //SM pattern instead!
-            switch (_state)
+            switch (_state.Value)
             {
                 case State.Idle:
                     break;
@@ -45,42 +72,42 @@ namespace KitchenChaos.Interactions
                     ExecuteBurning();
                     break;
                 case State.Burned:
-                    OnProgressChanged?.Invoke(0);
                     break;
             }
         }
 
         void ExecuteBurning()
         {
-            _burningTimer += Time.deltaTime;
-            OnProgressChanged?.Invoke(GetProgressNormalized(_burningTimer, _currentBurningRecipe.BurningTimerMax));
+            _burningTimer.Value += Time.deltaTime;
 
-            if (_burningTimer > GetBurningTimerMax())
+            if (_burningTimer.Value > GetBurningTimerMax())
             {
-                GetKitchenObject().DestroySelf();
+                KitchenObject.DestroyKitchenObject(GetKitchenObject());
+
                 KitchenObject.SpawnKitchenObject(_currentBurningRecipe.Output, this);
                 _currentBurningRecipe = null;
 
-                _state = State.Burned;
-                OnStateChanged?.Invoke(_state, this);
+                _state.Value = State.Burned;
             }
         }
 
         void ExecuteFrying()
         {
-            _fryingTimer += Time.deltaTime;
-            OnProgressChanged?.Invoke(GetProgressNormalized(_fryingTimer, _currentFryingRecipe.FryingTimerMax));
-
-            if (_fryingTimer > GetFryingTimerMax())
+            _fryingTimer.Value += Time.deltaTime;
+            
+            if (_fryingTimer.Value > GetFryingTimerMax())
             {
-                GetKitchenObject().DestroySelf();
+                KitchenObject.DestroyKitchenObject(GetKitchenObject());
+
                 KitchenObject.SpawnKitchenObject(_currentFryingRecipe.Output, this);
                 _currentFryingRecipe = null;
 
-                _state = State.Fried;
-                _currentBurningRecipe = GetKitchenObject().KitchenObjectSO.GetBurningRecipe();
-                _burningTimer = 0f;
-                OnStateChanged?.Invoke(_state, this);
+                _state.Value = State.Fried;
+                
+                SetBurningRecipeSOClientRpc(
+                    GameMultiplayer.Instance.GetKitchenObjectSOIndex(GetKitchenObject().KitchenObjectSO));
+                
+                _burningTimer.Value = 0f;
             }
         }
 
@@ -94,15 +121,9 @@ namespace KitchenChaos.Interactions
                     if (CanBeFried(playerKitchenObject))
                     {
                         playerKitchenObject.SetKitchenObjectHolder(this);
-                        _currentFryingRecipe = GetKitchenObject().KitchenObjectSO.GetFryingRecipe();
 
-                        _fryingTimer = 0f;
-                        _state = State.Frying;
-                        OnStateChanged?.Invoke(_state, this);
-
-                        OnProgressChanged?.Invoke(GetProgressNormalized(_fryingTimer, _currentFryingRecipe.FryingTimerMax));
-                        //if (_currentKitchenObject.CuttingTracker != 0)
-                        //    OnProgressChanged?.Invoke(TrackCuts());
+                        PlaceObjectOnCounterServerRpc(
+                            GameMultiplayer.Instance.GetKitchenObjectSOIndex(playerKitchenObject.KitchenObjectSO));                      
                     }
                 }
             }
@@ -111,15 +132,62 @@ namespace KitchenChaos.Interactions
                 if (!player.HasKitchenObject())
                 {
                     GetKitchenObject().SetKitchenObjectHolder(player);
-                    CleanStove();
+                    CleanStoveServerRpc();
                 }
                 else
                 {
                     if (AttemptTransferFromCounterToPlate(player))
-                        CleanStove();
+                        CleanStoveServerRpc();
                 }
             }
         }
+
+        #region MULTIPLAYER
+
+        [ServerRpc(RequireOwnership = false)]
+        void SetStateIdleServerRpc()
+        {
+            _state.Value = State.Idle;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void PlaceObjectOnCounterServerRpc(int kitchenObjectSOIndex)
+        {
+            //moved from ClientRpc because only server can write to the NetworkVariable
+            _fryingTimer.Value = 0f;
+            _state.Value = State.Frying;
+
+            SetFryingRecipeSOClientRpc(kitchenObjectSOIndex);
+        }
+
+        [ClientRpc]
+        void SetFryingRecipeSOClientRpc(int kitchenObjectSOIndex)
+        {
+            // if error - serialize recipes here!
+            SO_KitchenObject kitchenObjectSO = GameMultiplayer.Instance.GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+            _currentFryingRecipe = kitchenObjectSO.GetFryingRecipe();
+        }
+
+        [ClientRpc]
+        void SetBurningRecipeSOClientRpc(int kitchenObjectSOIndex)
+        {
+            // if error - serialize recipes here!
+            SO_KitchenObject kitchenObjectSO = GameMultiplayer.Instance.GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+            _currentBurningRecipe = kitchenObjectSO.GetBurningRecipe();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void CleanStoveServerRpc()
+        {
+            CleanStoveClientRpc();
+        }
+
+        [ClientRpc]
+        void CleanStoveClientRpc()
+        {
+            CleanStove();
+        }
+        #endregion
 
         bool CanBeFried(KitchenObject kitchenObject)
         {
@@ -128,7 +196,7 @@ namespace KitchenChaos.Interactions
 
         public bool IsFried()
         {
-            return _state == State.Fried;
+            return _state.Value == State.Fried;
         }
 
         float GetFryingTimerMax()
@@ -145,10 +213,7 @@ namespace KitchenChaos.Interactions
         {
             _currentFryingRecipe = null;
             _currentBurningRecipe = null;
-            _state = State.Idle;
-
-            OnStateChanged?.Invoke(_state, this);
-            OnProgressChanged?.Invoke(0);
+            SetStateIdleServerRpc();
         }
 
         float GetProgressNormalized(float timer, float max)

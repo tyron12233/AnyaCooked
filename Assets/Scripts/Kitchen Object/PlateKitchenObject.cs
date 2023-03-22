@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
+using KitchenChaos.Interactions.Multiplayer;
 
 namespace KitchenChaos.Interactions
 {
@@ -19,10 +21,24 @@ namespace KitchenChaos.Interactions
                 return false;
             else
             {
-                _kitchenObjects.Add(kitchenObjectSO);
-                OnIngredientAdded?.Invoke(kitchenObjectSO);
+                AddIngredientServerRpc(GameMultiplayer.Instance.GetKitchenObjectSOIndex(kitchenObjectSO));
                 return true;
             }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void AddIngredientServerRpc(int kitchenObjectSOIndex)
+        {
+            AddIngredientClientRpc(kitchenObjectSOIndex);
+        }
+
+        [ClientRpc]
+        void AddIngredientClientRpc(int kitchenObjectSOIndex)
+        {
+            SO_KitchenObject kitchenObjectSO = GameMultiplayer.Instance.GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+
+            _kitchenObjects.Add(kitchenObjectSO);
+            OnIngredientAdded?.Invoke(kitchenObjectSO);
         }
     }
 }
