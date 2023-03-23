@@ -13,6 +13,18 @@ namespace KitchenChaos.Interactions
 
         KitchenObject _kitchenObject;
 
+        public override void OnNetworkSpawn()
+        {
+            if (IsServer)
+                NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
+        }
+
+        private void NetworkManager_OnClientDisconnectCallback(ulong clientId)
+        {
+            if (clientId == OwnerClientId && HasKitchenObject())
+                KitchenObject.DestroyKitchenObject(GetKitchenObject());
+        }
+
         public void ClearKitchenObject()
         {
             _kitchenObject = null;

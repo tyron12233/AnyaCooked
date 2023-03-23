@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using Unity.Netcode;
 
 namespace KitchenChaos.Core.UI
 {
@@ -29,6 +30,7 @@ namespace KitchenChaos.Core.UI
 
             _menuButton.onClick.AddListener(() =>
             {
+                NetworkManager.Singleton.Shutdown();
                 Loader.LoadScene(Loader.Scene.MainMenuScene);
             });
 

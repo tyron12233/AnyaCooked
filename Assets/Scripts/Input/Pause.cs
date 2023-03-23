@@ -31,6 +31,19 @@ namespace KitchenChaos.PlayerInput
         public override void OnNetworkSpawn()
         {
             _isGamePaused.OnValueChanged += IsGamePaused_OnValueChanged;
+
+            if (IsServer)
+                NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
+        }
+
+        // test 
+        void NetworkManager_OnClientDisconnectCallback(ulong clientId)
+        {
+            if (clientId == OwnerClientId && _isLocalGamePaused)
+            {
+                _isLocalGamePaused = false;
+                CheckForAnyPlayerPaused();
+            }
         }
 
         private void IsGamePaused_OnValueChanged(bool previousValue, bool newValue)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using KitchenChaos.Core;
+using Unity.Netcode;
 
 namespace KitchenChaos.PlayerInput.UI
 {
@@ -42,6 +43,7 @@ namespace KitchenChaos.PlayerInput.UI
         {
             _menuButton.onClick.AddListener(() =>
             {
+                NetworkManager.Singleton.Shutdown();
                 Loader.LoadScene(Loader.Scene.MainMenuScene);
             });
 
