@@ -1,23 +1,53 @@
 using UnityEngine;
 using KitchenChaos.Core;
 using System;
+using System.Collections.Generic;
+using Unity.Netcode;
 
 namespace KitchenChaos.PlayerInput
 {
-    public class Pause : MonoBehaviour
+    public class Pause : NetworkBehaviour
     {
         public event Action OnPauseButtonPressed;
+        public event Action OnMultiplayerPauseButtonPressed;
 
         [SerializeField] GameInput _input;
-        bool _paused;
-        public bool Paused => _paused;
+        bool _isLocalGamePaused;
+        public bool Paused => _isLocalGamePaused;
+        NetworkVariable<bool> _isGamePaused = new NetworkVariable<bool>(false);
+
+        Dictionary<ulong, bool> _playerPausedDictionary;
+
+        private void Awake()
+        {
+            _playerPausedDictionary = new Dictionary<ulong, bool>();
+        }
 
         void Start()
         {
-            _input.OnPauseAction += _input_OnPauseAction;
+            _input.OnPauseAction += GameInput_OnPauseAction;
         }
 
-        void _input_OnPauseAction()
+        public override void OnNetworkSpawn()
+        {
+            _isGamePaused.OnValueChanged += IsGamePaused_OnValueChanged;
+        }
+
+        private void IsGamePaused_OnValueChanged(bool previousValue, bool newValue)
+        {
+            if (_isGamePaused.Value)
+            {
+                Time.timeScale = 0f;
+                OnMultiplayerPauseButtonPressed?.Invoke();
+            }
+            else
+            {
+                Time.timeScale = 1f;
+                OnMultiplayerPauseButtonPressed?.Invoke();
+            }
+        }
+
+        void GameInput_OnPauseAction()
         {
             TogglePauseGame();
         }
@@ -26,19 +56,57 @@ namespace KitchenChaos.PlayerInput
         {
             if (GameManager.Instance.IsGameOver()) return;
         
-            _paused = !_paused;
+            _isLocalGamePaused = !_isLocalGamePaused;
+
+
+            if (_isLocalGamePaused)
+            {
+                PauseGameServerRpc();
+            }
+            else
+            {
+                UnpauseGameServerRpc();
+            }
 
             OnPauseButtonPressed?.Invoke();
-
-            if (_paused)
-                Time.timeScale = 0f;
-            else
-                Time.timeScale = 1f;
         }
 
-        void OnDestroy()
+        [ServerRpc(RequireOwnership = false)]
+        void PauseGameServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            _input.OnPauseAction -= _input_OnPauseAction;
+            _playerPausedDictionary[serverRpcParams.Receive.SenderClientId] = true;
+
+            CheckForAnyPlayerPaused();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void UnpauseGameServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            _playerPausedDictionary[serverRpcParams.Receive.SenderClientId] = false;
+
+            CheckForAnyPlayerPaused();
+        }
+
+        void CheckForAnyPlayerPaused()
+        {
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                if (_playerPausedDictionary.ContainsKey(clientId) || _playerPausedDictionary[clientId])
+                {
+                    // this player is paused
+                    _isGamePaused.Value = true;
+                    return;
+                }
+            }
+
+            // all players are unpaused
+            _isGamePaused.Value = false;
+        }
+
+        //on despawn instead??
+        public override void OnDestroy()
+        {
+            _input.OnPauseAction -= GameInput_OnPauseAction;
         }
     }
 }
