@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
+using KitchenChaos.Interactions.Multiplayer;
 
 namespace KitchenChaos.Multiplayer.UI
 {
@@ -16,14 +15,14 @@ namespace KitchenChaos.Multiplayer.UI
             _startHostButton.onClick.AddListener(() =>
             {
                 Debug.Log("Host");
-                NetworkManager.Singleton.StartHost();
+                GameMultiplayer.Instance.StartHost();
                 Hide();
             });
 
             _startClientButton.onClick.AddListener(() =>
             {
                 Debug.Log("Client");
-                NetworkManager.Singleton.StartClient();
+                GameMultiplayer.Instance.StartClient();
                 Hide();
             });
         }

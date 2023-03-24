@@ -3130,7 +3130,7 @@ MonoBehaviour:
       OverridingTargetPrefab: {fileID: 0}
     TickRate: 30
     ClientConnectionBufferTimeout: 10
-    ConnectionApproval: 0
+    ConnectionApproval: 1
     ConnectionData: 
     EnableTimeResync: 0
     TimeResyncInterval: 30
@@ -14426,7 +14426,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db35503d0536f574b95443147ce53a30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pauseScript: {fileID: 914307041}
 --- !u!1001 &1633640966
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19592,7 +19591,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4249219735443667365, guid: e640828525892d843bb3d3ab0a9f5547, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -519
+      value: -227
       objectReference: {fileID: 0}
     - target: {fileID: 4249219735443667365, guid: e640828525892d843bb3d3ab0a9f5547, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -19608,7 +19607,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4249219735443667370, guid: e640828525892d843bb3d3ab0a9f5547, type: 3}
       propertyPath: m_text
-      value: GAME PAUSED
+      value: PAUSED
       objectReference: {fileID: 0}
     - target: {fileID: 4249219735443667370, guid: e640828525892d843bb3d3ab0a9f5547, type: 3}
       propertyPath: m_fontColor.a

@@ -1,29 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KitchenChaos.PlayerInput
 {
     public class GamePauseMultiplayerUI : MonoBehaviour
     {
-        [SerializeField] Pause _pauseScript;
+        Pause _pauseScript;
+
+        private void Awake()
+        {
+            _pauseScript = FindObjectOfType<Pause>();
+        }
 
         private void Start()
         {
-            _pauseScript.OnMultiplayerPauseButtonPressed += Pause_OnMultiplayerPauseButtonPressed;
+            _pauseScript.OnMultiplayerPause += Pause_OnMultiplayerPause;
 
-            DisplayMultiplayerPauseScreen(false);
+            DisplayPauseScreen(false);
         }
 
-        void Pause_OnMultiplayerPauseButtonPressed()
+        void Pause_OnMultiplayerPause()
         {
-            DisplayMultiplayerPauseScreen(!gameObject.activeSelf);
+            DisplayPauseScreen(!gameObject.activeSelf);
         }
 
-        void DisplayMultiplayerPauseScreen(bool shouldDisplay)
+        void DisplayPauseScreen(bool shouldDisplay)
         {
             gameObject.SetActive(shouldDisplay);
         }
-
     }
 }

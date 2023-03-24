@@ -9,7 +9,7 @@ namespace KitchenChaos.PlayerInput
     public class Pause : NetworkBehaviour
     {
         public event Action OnPauseButtonPressed;
-        public event Action OnMultiplayerPauseButtonPressed;
+        public event Action OnMultiplayerPause;
 
         [SerializeField] GameInput _input;
         bool _isLocalGamePaused;
@@ -51,12 +51,12 @@ namespace KitchenChaos.PlayerInput
             if (_isGamePaused.Value)
             {
                 Time.timeScale = 0f;
-                OnMultiplayerPauseButtonPressed?.Invoke();
+                OnMultiplayerPause?.Invoke();
             }
             else
             {
+                OnMultiplayerPause?.Invoke();
                 Time.timeScale = 1f;
-                OnMultiplayerPauseButtonPressed?.Invoke();
             }
         }
 
@@ -73,13 +73,9 @@ namespace KitchenChaos.PlayerInput
 
 
             if (_isLocalGamePaused)
-            {
                 PauseGameServerRpc();
-            }
             else
-            {
                 UnpauseGameServerRpc();
-            }
 
             OnPauseButtonPressed?.Invoke();
         }
@@ -104,7 +100,7 @@ namespace KitchenChaos.PlayerInput
         {
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
-                if (_playerPausedDictionary.ContainsKey(clientId) || _playerPausedDictionary[clientId])
+                if (_playerPausedDictionary.ContainsKey(clientId) && _playerPausedDictionary[clientId])
                 {
                     // this player is paused
                     _isGamePaused.Value = true;
