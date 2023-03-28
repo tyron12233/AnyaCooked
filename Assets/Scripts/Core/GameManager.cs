@@ -13,6 +13,7 @@ namespace KitchenChaos.Core
         public event Action OnStateChanged;
         public event Action OnLocalPlayerReadyChanged;
 
+        [SerializeField] Transform _playerPrefab;
         [SerializeField] GameInput _gameInput;
         [SerializeField] NetworkVariable<float> _countdownToStartTimer = new NetworkVariable<float>(3f);
         public float CountdownToStartTimer => _countdownToStartTimer.Value;
@@ -52,6 +53,17 @@ namespace KitchenChaos.Core
         public override void OnNetworkSpawn()
         {
             _state.OnValueChanged += GameplayState_OnValueChanged;
+
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneManager_OnLoadEventCompleted;
+        }
+
+        void SceneManager_OnLoadEventCompleted(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        {
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                Transform player = Instantiate(_playerPrefab);
+                player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
+            }
         }
 
         void GameplayState_OnValueChanged(GameplayState previousValue, GameplayState newValue)

@@ -3,7 +3,7 @@ using KitchenChaos.Control;
 using KitchenChaos.Interactions;
 using KitchenChaos.Core.UI;
 
-namespace KitchenChaos.Core
+namespace KitchenChaos.DataReset
 {
     public class ResetStaticDataManager : MonoBehaviour
     {

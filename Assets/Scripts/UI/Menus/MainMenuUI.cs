@@ -23,7 +23,7 @@ namespace KitchenChaos.Core
         {
             _playButton.onClick.AddListener(() =>
             {
-                Loader.LoadScene(Loader.Scene.GameScene);
+                Loader.LoadScene(Loader.Scene.LobbyScene);
             });
 
             _quitButton.onClick.AddListener(() =>

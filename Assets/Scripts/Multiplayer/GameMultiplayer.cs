@@ -1,6 +1,8 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using KitchenChaos.Core;
+using UnityEngine.SceneManagement;
 
 namespace KitchenChaos.Interactions.Multiplayer
 {
@@ -8,11 +10,18 @@ namespace KitchenChaos.Interactions.Multiplayer
     {
         public static GameMultiplayer Instance { get; private set; }
 
+        public event Action OnTryingToJoinGame;
+        public event Action OnFailedToJoinGame;
+
         [SerializeField] SO_KitchenObjectList _kitchenObjectListSO;
+
+        const int MAX_NUMBER_PLAYERS = 4;
 
         void Awake()
         {
             Instance = this;
+
+            DontDestroyOnLoad(gameObject);
         }
 
         public void StartHost()
@@ -24,18 +33,34 @@ namespace KitchenChaos.Interactions.Multiplayer
         void NetworkManager_ConnectionApprovalCallback(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest,
             NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
         {
-            if (GameManager.Instance.IsWaitingToStart())
+
+            if (SceneManager.GetActiveScene().name != Loader.Scene.CharacterSelectScene.ToString())
             {
-                connectionApprovalResponse.Approved = true;
-                connectionApprovalResponse.CreatePlayerObject = true;
-            }
-            else
                 connectionApprovalResponse.Approved = false;
+                connectionApprovalResponse.Reason = "Game has already started";
+                return;
+            }
+
+            if (NetworkManager.Singleton.ConnectedClientsIds.Count >= MAX_NUMBER_PLAYERS)
+            {
+                connectionApprovalResponse.Approved = false;
+                connectionApprovalResponse.Reason = "Game is full";
+                return;
+            }
+
+            connectionApprovalResponse.Approved = true;
         }
 
         public void StartClient()
         {
+            NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
+            OnTryingToJoinGame?.Invoke();
             NetworkManager.Singleton.StartClient();
+        }
+
+        private void NetworkManager_OnClientDisconnectCallback(ulong clientId)
+        {
+            OnFailedToJoinGame?.Invoke();
         }
 
         //for prototyping only - implement pooling
