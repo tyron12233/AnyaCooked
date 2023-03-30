@@ -1,6 +1,5 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Unity.Netcode;
 using KitchenChaos.Core;
 
@@ -8,6 +7,8 @@ namespace KitchenChaos.Multiplayer
 {
     public class CharacterSelectReady : NetworkBehaviour
     {
+        public event Action OnReadyChanged;
+
         Dictionary<ulong, bool> _playerReadyDictionary;
 
         void Awake()
@@ -24,6 +25,8 @@ namespace KitchenChaos.Multiplayer
         [ServerRpc(RequireOwnership = false)]
         void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
+            SetPlayerReadyClientRpc(serverRpcParams.Receive.SenderClientId);
+
             _playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
 
             bool allClientsReady = true;
@@ -40,5 +43,18 @@ namespace KitchenChaos.Multiplayer
             if (allClientsReady)
                 Loader.LoadSceneNetwork(Loader.Scene.GameScene);
         }
+
+        [ClientRpc]
+        void SetPlayerReadyClientRpc(ulong clientId)
+        {
+            _playerReadyDictionary[clientId] = true;
+            OnReadyChanged?.Invoke();
+        }
+
+        public bool IsPlayerReady(ulong clientId)
+        {
+            return _playerReadyDictionary.ContainsKey(clientId) && _playerReadyDictionary[clientId];
+        }
+
     }
 }

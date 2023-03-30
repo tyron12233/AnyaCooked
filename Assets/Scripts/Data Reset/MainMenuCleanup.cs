@@ -1,6 +1,4 @@
-using KitchenChaos.Interactions.Multiplayer;
-using System.Collections;
-using System.Collections.Generic;
+using KitchenChaos.Multiplayer;
 using Unity.Netcode;
 using UnityEngine;
 

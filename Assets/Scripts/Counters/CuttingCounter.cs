@@ -1,7 +1,7 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
-using KitchenChaos.Interactions.Multiplayer;
+using KitchenChaos.Multiplayer;
 
 namespace KitchenChaos.Interactions
 {

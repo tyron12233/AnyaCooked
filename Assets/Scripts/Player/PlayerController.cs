@@ -1,10 +1,11 @@
 using System;
-using Unity.Netcode;
+using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 using KitchenChaos.Core;
 using KitchenChaos.PlayerInput;
 using KitchenChaos.Interactions;
-using System.Collections.Generic;
+using KitchenChaos.Multiplayer;
 
 namespace KitchenChaos.Control
 {
@@ -19,6 +20,7 @@ namespace KitchenChaos.Control
         [SerializeField] LayerMask _countersLayer;
         [SerializeField] LayerMask _collisionsLayer;
         [SerializeField] List<Vector3> _playerSpawnPositions;
+        [SerializeField] PlayerVisual _playerVisual;
 
         GameInput _playerInput;
 
@@ -35,7 +37,7 @@ namespace KitchenChaos.Control
             
             _player = GetComponent<PlayerInteractions>();
             
-            transform.position = _playerSpawnPositions[(int)OwnerClientId];
+            transform.position = _playerSpawnPositions[GameMultiplayer.Instance.GetPlayerDataIndexFromClientId(OwnerClientId)];
             OnAnyPlayerSpawned?.Invoke();
         }
 
@@ -44,6 +46,10 @@ namespace KitchenChaos.Control
             _playerInput = FindObjectOfType<GameInput>();
             _playerInput.OnInteractAction += _playerInput_OnInteractAction;
             _playerInput.OnInteractAltAction += _playerInput_OnInteractAltAction;
+
+            // separate this from controller!
+            PlayerData playerData = GameMultiplayer.Instance.GetPlayerDataFromClientId(OwnerClientId);
+            _playerVisual.SetPlayerColor(GameMultiplayer.Instance.GetPlayerColor(playerData.ColorId));
         }
 
         private void _playerInput_OnInteractAltAction()

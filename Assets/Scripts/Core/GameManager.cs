@@ -1,8 +1,8 @@
-using KitchenChaos.PlayerInput;
 using System;
 using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode;
+using KitchenChaos.PlayerInput;
 
 namespace KitchenChaos.Core
 {
