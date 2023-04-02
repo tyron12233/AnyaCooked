@@ -16,10 +16,11 @@ namespace KitchenChaos.Multiplayer
         public event Action OnFailedToJoinGame;
         public event Action OnPlayerDataNetworkListChanged;
 
+        public const int MAX_NUMBER_PLAYERS = 4;
+        
         [SerializeField] SO_KitchenObjectList _kitchenObjectListSO;
         [SerializeField] List<Color> _playerColorList;
 
-        const int MAX_NUMBER_PLAYERS = 4;
         NetworkList<PlayerData> _playerDataNetworkList;
 
         void Awake()

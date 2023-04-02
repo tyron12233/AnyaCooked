@@ -8,14 +8,17 @@ namespace KitchenChaos.Core.UI
     {
         [SerializeField] Button _restartButton;
 
-        private void Start()
+        void Awake()
         {
-            NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
-
             _restartButton.onClick.AddListener(() =>
             {
                 Loader.LoadScene(Loader.Scene.GameScene);
             });
+        }
+
+        void Start()
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
 
             Hide();
         }

@@ -13,6 +13,10 @@ namespace KitchenChaos.DataReset
 
             if (GameMultiplayer.Instance != null)
                 Destroy(GameMultiplayer.Instance.gameObject);
+
+            if (KitchenGameLobby.Instance != null)
+                Destroy(KitchenGameLobby.Instance.gameObject);
         }
+
     }
 }

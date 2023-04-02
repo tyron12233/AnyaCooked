@@ -824,11 +824,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 2
-  cloudProjectId: 
+  cloudProjectId: e37a90b8-959b-4c9b-a8ab-9a4f78f9e4ba
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: Kitchen Chaos
+  organizationId: ddorothyy
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 
