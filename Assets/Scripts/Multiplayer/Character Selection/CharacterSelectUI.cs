@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
 using KitchenChaos.Core;
+using TMPro;
+using Unity.Services.Lobbies.Models;
 
 namespace KitchenChaos.Multiplayer.UI
 {
@@ -10,11 +12,14 @@ namespace KitchenChaos.Multiplayer.UI
         [SerializeField] Button _mainMenuButton;
         [SerializeField] Button _readyButton;
         [SerializeField] CharacterSelectReady _characterSelectReady;
+        [SerializeField] TextMeshProUGUI _lobbyNameText;
+        [SerializeField] TextMeshProUGUI _lobbyCodeText;
 
-        private void Awake()
+        void Awake()
         {
             _mainMenuButton.onClick.AddListener(() =>
             {
+                KitchenGameLobby.Instance.LeaveLobby();
                 NetworkManager.Singleton.Shutdown();
                 Loader.LoadScene(Loader.Scene.MainMenuScene);
             });
@@ -24,5 +29,16 @@ namespace KitchenChaos.Multiplayer.UI
                 _characterSelectReady.SetPlayerReady();
             });
         }
+
+        void Start()
+        {
+            Lobby lobby = KitchenGameLobby.Instance.GetLobby();
+
+            _lobbyNameText.text = "Lobby: " + lobby.Name;
+            _lobbyCodeText.text = lobby.LobbyCode;
+        }
+
+
+
     }
 }

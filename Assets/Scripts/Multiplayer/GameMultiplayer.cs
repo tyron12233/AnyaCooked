@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using KitchenChaos.Core;
 using KitchenChaos.Interactions;
+using Unity.Services.Authentication;
 
 namespace KitchenChaos.Multiplayer
 {
@@ -17,17 +18,22 @@ namespace KitchenChaos.Multiplayer
         public event Action OnPlayerDataNetworkListChanged;
 
         public const int MAX_NUMBER_PLAYERS = 4;
+        public const string PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER = "PlayerNameMultiplayer";
         
         [SerializeField] SO_KitchenObjectList _kitchenObjectListSO;
         [SerializeField] List<Color> _playerColorList;
 
         NetworkList<PlayerData> _playerDataNetworkList;
+        string _playerName;
 
         void Awake()
         {
             Instance = this;
 
             DontDestroyOnLoad(gameObject);
+
+            string defaultName = "Player" + UnityEngine.Random.Range(2, 1000).ToString();
+            _playerName = PlayerPrefs.GetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, defaultName);
 
             _playerDataNetworkList = new NetworkList<PlayerData>();
             _playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
@@ -67,6 +73,9 @@ namespace KitchenChaos.Multiplayer
                 ClientId = clientId,
                 ColorId = GetFirstUnusedColorId(),
             });
+
+            SetPlayerNameServerRpc(_playerName);
+            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
         }
 
         void NetworkManager_ConnectionApprovalCallback(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest,
@@ -93,11 +102,42 @@ namespace KitchenChaos.Multiplayer
         public void StartClient()
         {
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Client_OnClientDisconnectCallback;
+            NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Client_OnClientConnectedCallback;
             OnTryingToJoinGame?.Invoke();
             NetworkManager.Singleton.StartClient();
         }
 
-        private void NetworkManager_Client_OnClientDisconnectCallback(ulong clientId)
+        void NetworkManager_Client_OnClientConnectedCallback(ulong clientId)
+        {
+            SetPlayerNameServerRpc(_playerName);
+            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void SetPlayerNameServerRpc(string playerName, ServerRpcParams serverRpcParams = default)
+        {
+            int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+            PlayerData playerData = _playerDataNetworkList[playerDataIndex];
+
+            playerData.PlayerName = playerName;
+
+            _playerDataNetworkList[playerDataIndex] = playerData;
+
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void SetPlayerIdServerRpc(string playerId, ServerRpcParams serverRpcParams = default)
+        {
+            int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+            PlayerData playerData = _playerDataNetworkList[playerDataIndex];
+
+            playerData.PlayerId = playerId;
+
+            _playerDataNetworkList[playerDataIndex] = playerData;
+
+        }
+
+        void NetworkManager_Client_OnClientDisconnectCallback(ulong clientId)
         {
             OnFailedToJoinGame?.Invoke();
         }
@@ -261,6 +301,19 @@ namespace KitchenChaos.Multiplayer
         {
             NetworkManager.Singleton.DisconnectClient(clientId);
             NetworkManager_Server_OnClientDisconnectCallback(clientId);
+        }
+
+
+        public string GetPlayerName()
+        {
+            return _playerName;
+        }
+
+        public void SetPlayerName(string name)
+        {
+            _playerName = name;
+
+            PlayerPrefs.SetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, name);
         }
 
     }

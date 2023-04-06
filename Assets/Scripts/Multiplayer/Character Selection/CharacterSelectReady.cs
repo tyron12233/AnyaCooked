@@ -41,7 +41,10 @@ namespace KitchenChaos.Multiplayer
             }
 
             if (allClientsReady)
+            {
+                KitchenGameLobby.Instance.DeleteLobby();
                 Loader.LoadSceneNetwork(Loader.Scene.GameScene);
+            }
         }
 
         [ClientRpc]

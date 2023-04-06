@@ -12,7 +12,7 @@ namespace KitchenChaos.Core.UI
         {
             _restartButton.onClick.AddListener(() =>
             {
-                Loader.LoadScene(Loader.Scene.GameScene);
+                Loader.LoadScene(Loader.Scene.MainMenuScene);
             });
         }
 
