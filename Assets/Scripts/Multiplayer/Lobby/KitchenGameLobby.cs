@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using KitchenChaos.Core;
-
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using System.Threading.Tasks;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Unity.Networking.Transport.Relay;
 
 namespace KitchenChaos.Multiplayer
 {
@@ -24,6 +30,8 @@ namespace KitchenChaos.Multiplayer
         [SerializeField] float _heartBeatTimerMax = 15f;
         [SerializeField] float _refreshLobbiesTimerMax = 3f;
 
+        const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
+
         Lobby _joinedLobby;
         float _heartBeatTimer;
         float _refreshLobbiesTimer;
@@ -38,6 +46,10 @@ namespace KitchenChaos.Multiplayer
 
         void Update()
         {
+            // error? -> move check to RefreshLobbyList
+            if (SceneManager.GetActiveScene().name != Loader.Scene.LobbyScene.ToString())
+                return;
+
             HandleHeartbeat();
             PeriodicallyRefreshLobbyList();
         }
@@ -108,6 +120,72 @@ namespace KitchenChaos.Multiplayer
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
 
+        async Task<Allocation> AllocateRelay()
+        {
+            try
+            {
+                Allocation allocation = await RelayService.Instance.CreateAllocationAsync(GameMultiplayer.MAX_NUMBER_PLAYERS - 1);
+                return allocation;
+            }
+            catch (RelayServiceException e)
+            {
+                Debug.Log(e);
+                return default;
+            }
+        }
+
+        async Task SetRelay()
+        {
+            Allocation allocation = await AllocateRelay();
+            string relayJoinCode = await GetRelayJoinCode(allocation);
+
+            await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
+            {
+                Data = new Dictionary<string, DataObject>
+                {
+                    {KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) }
+                }
+            });
+
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation, "dtls"));
+        }
+
+        async Task<string> GetRelayJoinCode(Allocation allocation)
+        {
+            try
+            {
+                string relayCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+                return relayCode;
+            }
+            catch (RelayServiceException e)
+            {
+                Debug.Log(e);
+                return default;
+            }
+        }
+
+        async Task<JoinAllocation> JoinRelayWCode(string code)
+        {
+            try
+            {
+                JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(code);
+                return joinAllocation;
+            }
+            catch (RelayServiceException e)
+            {
+                Debug.Log(e);
+                return default;
+            }
+        }
+
+        async Task JoinRelay()
+        {
+            string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
+            JoinAllocation joinAllocation = await JoinRelayWCode(relayJoinCode);
+
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+        }
+
         public async void CreateLobby(string lobbyName, bool isPrivate)
         {
             OnCreateLobbyStarted?.Invoke();
@@ -118,6 +196,8 @@ namespace KitchenChaos.Multiplayer
                 {
                     IsPrivate = isPrivate
                 });
+
+                await SetRelay();
 
                 GameMultiplayer.Instance.StartHost();
                 Loader.LoadSceneNetwork(Loader.Scene.CharacterSelectScene);
@@ -137,6 +217,8 @@ namespace KitchenChaos.Multiplayer
             {
                 _joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
 
+                await JoinRelay();
+
                 GameMultiplayer.Instance.StartClient();
             }
             catch (LobbyServiceException e)
@@ -153,6 +235,8 @@ namespace KitchenChaos.Multiplayer
             try
             {
                 _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+
+                await JoinRelay();
 
                 GameMultiplayer.Instance.StartClient();
             }
@@ -171,6 +255,8 @@ namespace KitchenChaos.Multiplayer
             try
             {
                 _joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
+
+                await JoinRelay();
 
                 GameMultiplayer.Instance.StartClient();
             }

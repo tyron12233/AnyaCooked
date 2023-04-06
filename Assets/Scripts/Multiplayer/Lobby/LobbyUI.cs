@@ -83,6 +83,9 @@ namespace KitchenChaos.Multiplayer.UI
             }
         }
 
-
+        void OnDestroy()
+        {
+            KitchenGameLobby.Instance.OnLobbyListChanged -= KitchenGameLobby_OnLobbyListChanged;
+        }
     }
 }
