@@ -13,6 +13,8 @@ namespace KitchenChaos.Multiplayer
     {
         public static GameMultiplayer Instance { get; private set; }
 
+        public static bool PlayMultiplayer;
+
         public event Action OnTryingToJoinGame;
         public event Action OnFailedToJoinGame;
         public event Action OnPlayerDataNetworkListChanged;
@@ -37,6 +39,15 @@ namespace KitchenChaos.Multiplayer
 
             _playerDataNetworkList = new NetworkList<PlayerData>();
             _playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
+        }
+
+        void Start()
+        {
+            if (!PlayMultiplayer)
+            {
+                StartHost();
+                Loader.LoadSceneNetwork(Loader.Scene.GameScene);
+            }
         }
 
         private void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)
@@ -159,6 +170,11 @@ namespace KitchenChaos.Multiplayer
         {
             SO_KitchenObject kitchenObjectSO = GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
 
+            kitchenObjectHolder_NetworkObjRef.TryGet(out NetworkObject kitchenObjectHolder_NetworkObject);
+            IKitchenObjectHolder kitchenObjectHolder = kitchenObjectHolder_NetworkObject.GetComponent<IKitchenObjectHolder>();
+
+            if (kitchenObjectHolder.HasKitchenObject()) return;
+
             Transform kitchenObjectTransform = Instantiate(kitchenObjectSO.KitchenObjectPrefab);
 
             // Spawn object on network
@@ -167,9 +183,6 @@ namespace KitchenChaos.Multiplayer
 
             // Set KitchenObject holder/parent
             KitchenObject kitchenObject = kitchenObjectTransform.GetComponent<KitchenObject>();
-
-            kitchenObjectHolder_NetworkObjRef.TryGet(out NetworkObject kitchenObjectHolder_NetworkObject);
-            IKitchenObjectHolder kitchenObjectHolder = kitchenObjectHolder_NetworkObject.GetComponent<IKitchenObjectHolder>();
 
             kitchenObject.SetKitchenObjectHolder(kitchenObjectHolder);
         }
@@ -193,6 +206,9 @@ namespace KitchenChaos.Multiplayer
         void DestroyKitchenObjectServerRpc(NetworkObjectReference kitchenObject_NetworkObjRef)
         {
             kitchenObject_NetworkObjRef.TryGet(out NetworkObject kitchenObject_NetworkObject);
+
+            if (kitchenObject_NetworkObject == null) return;
+
             KitchenObject kitchenObject = kitchenObject_NetworkObject.GetComponent<KitchenObject>();
 
             ClearKitchenObjectHolderClientRpc(kitchenObject_NetworkObjRef);

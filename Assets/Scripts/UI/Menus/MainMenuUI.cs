@@ -1,3 +1,4 @@
+using KitchenChaos.Multiplayer;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,7 +6,8 @@ namespace KitchenChaos.Core
 {
     public class MainMenuUI : MonoBehaviour
     {
-        [SerializeField] Button _playButton;
+        [SerializeField] Button _playMultiplayerButton;
+        [SerializeField] Button _playSingleplayerButton;
         [SerializeField] Button _quitButton;
 
         void Awake()
@@ -16,13 +18,21 @@ namespace KitchenChaos.Core
 
         void Start()
         {
-            _playButton.Select();
+            _playMultiplayerButton.Select();
         }
 
         void SetupButtonListeners()
         {
-            _playButton.onClick.AddListener(() =>
+            _playMultiplayerButton.onClick.AddListener(() =>
             {
+                GameMultiplayer.PlayMultiplayer = true;
+                Loader.LoadScene(Loader.Scene.LobbyScene);
+            });
+
+            //why go through Lobby? Work around?
+            _playSingleplayerButton.onClick.AddListener(() =>
+            {
+                GameMultiplayer.PlayMultiplayer = false;
                 Loader.LoadScene(Loader.Scene.LobbyScene);
             });
 

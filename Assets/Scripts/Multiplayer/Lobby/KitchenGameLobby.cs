@@ -114,7 +114,7 @@ namespace KitchenChaos.Multiplayer
 
             // init with a different profile every time (for testing on the same unit)
             InitializationOptions initializationOptions = new InitializationOptions();
-            initializationOptions.SetProfile("Player" + UnityEngine.Random.Range(1, 100).ToString());
+            //initializationOptions.SetProfile("Player" + UnityEngine.Random.Range(1, 100).ToString());
 
             await UnityServices.InitializeAsync(initializationOptions);
             await AuthenticationService.Instance.SignInAnonymouslyAsync();

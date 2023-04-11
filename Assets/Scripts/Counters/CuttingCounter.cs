@@ -96,6 +96,7 @@ namespace KitchenChaos.Interactions
 
         public override void InteractAlt(PlayerInteractions player)
         {
+
             if (!HasKitchenObject() || player.HasKitchenObject() || !CanBeCut()) return;
 
             CutObjectServerRpc();
@@ -107,7 +108,8 @@ namespace KitchenChaos.Interactions
         [ServerRpc(RequireOwnership = false)]
         void CutObjectServerRpc()
         {
-            CutObjectClientRpc();
+            if (HasKitchenObject() && CanBeCut()) 
+                CutObjectClientRpc();
         }
 
         [ClientRpc]
@@ -122,6 +124,8 @@ namespace KitchenChaos.Interactions
         [ServerRpc(RequireOwnership = false)]
         void TestCuttingProgressDoneServerRpc()
         {
+            if (!HasKitchenObject() && !CanBeCut()) return;
+
             if (FinishedCutting())
             {
                 KitchenObject.DestroyKitchenObject(GetKitchenObject());
@@ -144,7 +148,8 @@ namespace KitchenChaos.Interactions
 
         bool CanBeCut()
         {
-            return GetKitchenObject().KitchenObjectSO.GetCuttingRecipe() != null;
+            //return GetKitchenObject().KitchenObjectSO.GetCuttingRecipe() != null;
+            return GetCurrentCuttingRecipe(GetKitchenObject().KitchenObjectSO) != null;
         }
 
         int GetCuttingProgressMax()
