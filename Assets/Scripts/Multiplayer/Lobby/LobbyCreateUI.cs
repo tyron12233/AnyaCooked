@@ -11,6 +11,7 @@ namespace KitchenChaos.Multiplayer.UI
         [SerializeField] Button _closeButton;
         [SerializeField] Button _createPublicButton;
         [SerializeField] Button _createPrivateButton;
+        [SerializeField] Button _preselectedButton;
         [SerializeField] TMP_InputField _lobbyNameInputField;
 
         void Awake()
@@ -39,6 +40,7 @@ namespace KitchenChaos.Multiplayer.UI
         public void Show()
         {
             gameObject.SetActive(true);
+            _preselectedButton.Select();
         }
 
         void Hide()
